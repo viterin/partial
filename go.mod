@@ -1,4 +1,4 @@
-module partial
+module github.com/viterin/partial
 
 go 1.19
 
