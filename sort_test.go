@@ -53,14 +53,14 @@ func TestSortOutOfBounds(t *testing.T) {
 
 	x := []int{9, 2, 5}
 	Sort(x, -1)
-	if !slices.Equal(x[:1], []int{2}) {
-		t.Errorf("Out of bounds failure")
+	if !slices.Equal(x, []int{9, 2, 5}) {
+		t.Errorf("Negative k should be treated as zero and sort nothing")
 	}
 
 	y := []int{9, 2, 5}
 	SortFunc(y, 5, less)
 	if !slices.Equal(y, []int{2, 5, 9}) {
-		t.Errorf("Out of bounds failure")
+		t.Errorf("Entire slice should be sorted when k is greater than len")
 	}
 }
 

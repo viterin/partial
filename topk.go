@@ -11,8 +11,10 @@ import (
 // equal to the kth element, all elements in x[k:] are greater than or equal.
 // This is faster than using slices.Sort.
 func TopK[E constraints.Ordered](x []E, k int) {
-	k = min(max(k, 1), len(x))
-	floydRivest(x, 0, len(x)-1, k-1) // 0-indexed
+	k = min(k, len(x))
+	if k > 0 {
+		floydRivest(x, 0, len(x)-1, k-1) // 0-indexed
+	}
 }
 
 // TopKFunc reorders a slice such that x[:k] contains the first k elements of
@@ -21,8 +23,10 @@ func TopK[E constraints.Ordered](x []E, k int) {
 // in x[:k-1] are less than or equal to the kth element, all elements in x[k:]
 // are greater than or equal. This is faster than using slices.SortFunc.
 func TopKFunc[E any](x []E, k int, less func(E, E) bool) {
-	k = min(max(k, 1), len(x))
-	floydRivestFunc(x, 0, len(x)-1, k-1, less)
+	k = min(k, len(x))
+	if k > 0 {
+		floydRivestFunc(x, 0, len(x)-1, k-1, less)
+	}
 }
 
 // https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm

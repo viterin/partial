@@ -95,15 +95,14 @@ func TestTopKOutOfBounds(t *testing.T) {
 
 	x := []int{9, 2, 5}
 	TopK(x, -1)
-	if !checkTopKInvariants(x, 1, less) {
-		t.Errorf("Out of bounds failure")
+	if !slices.Equal(x, []int{9, 2, 5}) {
+		t.Errorf("Negative k should be treated as zero and sort nothing")
 	}
 
 	y := []int{9, 2, 5}
 	TopK(y, 5)
-	checkTopKInvariants(y, 3, less)
-	if !checkTopKInvariants(x, 1, less) {
-		t.Errorf("Out of bounds failure")
+	if !checkTopKInvariants(y, 3, less) {
+		t.Errorf("Should take TopK of entire slice when k is greater than len")
 	}
 }
 

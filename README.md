@@ -2,11 +2,7 @@
 
 Fast, generic partial sorting algorithms in Go.
 
-Finding the top k items in a list is a common problem that's often solved by sorting the entire list. 
-This works fine for small lists, but becomes a performance bottleneck as the list grows. This package 
-provides a number of generic functions that solve the problem more efficiently. The interface mirrors 
-that of Go's slices package. See below for benchmarks comparing performance to that of Go's standard 
-sorting algorithms.
+Finding the top k items in a list is often done by sorting it first. This approach is slow for large lists as time is wasted sorting irrelevant items. The partial package provides a number of generic partial sorting algorithms to find them more efficiently. The interface mirrors that of Go's slices package. See below for benchmarks comparing performance to Go's standard sort.
 
 ## Installation
 
