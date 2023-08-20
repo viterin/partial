@@ -2,10 +2,11 @@ package partial
 
 import (
 	"fmt"
-	"golang.org/x/exp/slices"
 	"math/rand"
 	"sort"
 	"testing"
+
+	"golang.org/x/exp/slices"
 )
 
 func TestSort(t *testing.T) {
@@ -39,26 +40,27 @@ func TestSortFunc(t *testing.T) {
 		{[]person{{"bob", 45}, {"jane", 31}, {"karl", 39}}, 2},
 		{[]person{{"bob", 45}, {"jane", 31}, {"karl", 39}}, 3},
 	}
-	less := func(x, y person) bool { return x.age < y.age }
+	cmp := func(x, y person) int { return x.age - y.age }
 	for _, c := range cases {
-		SortFunc(c.x, c.k, less)
-		if !slices.IsSortedFunc(c.x[:c.k], less) {
+		SortFunc(c.x, c.k, cmp)
+		if !slices.IsSortedFunc(c.x[:c.k], cmp) {
 			t.Errorf("Not sorted, out=%v, k=%v", c.x, c.k)
 		}
 	}
 }
 
 func TestSortOutOfBounds(t *testing.T) {
-	less := func(x, y int) bool { return x < y }
+	cmp := func(x, y int) int { return x - y }
 
 	x := []int{9, 2, 5}
+
 	Sort(x, -1)
 	if !slices.Equal(x, []int{9, 2, 5}) {
 		t.Errorf("Negative k should be treated as zero and sort nothing")
 	}
 
 	y := []int{9, 2, 5}
-	SortFunc(y, 5, less)
+	SortFunc(y, 5, cmp)
 	if !slices.Equal(y, []int{2, 5, 9}) {
 		t.Errorf("Entire slice should be sorted when k is greater than len")
 	}
@@ -93,7 +95,7 @@ func BenchmarkSort(b *testing.B) {
 				b.StopTimer()
 				y := slices.Clone(x)
 				b.StartTimer()
-				slices.SortFunc(y, func(i, j int) bool { return i < j })
+				slices.SortFunc(y, func(i, j int) int { return i - j })
 			}
 		})
 		b.Run(fmt.Sprintf("partial.Sort_%d", size), func(b *testing.B) {
@@ -109,7 +111,7 @@ func BenchmarkSort(b *testing.B) {
 				b.StopTimer()
 				y := slices.Clone(x)
 				b.StartTimer()
-				SortFunc(y, k, func(i, j int) bool { return i < j })
+				SortFunc(y, k, func(i, j int) int { return i - j })
 			}
 		})
 	}

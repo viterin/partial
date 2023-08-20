@@ -1,8 +1,9 @@
 package partial
 
 import (
-	"golang.org/x/exp/constraints"
 	"math"
+
+	"golang.org/x/exp/constraints"
 )
 
 // TopK reorders a slice such that x[:k] contains the first k elements of the
@@ -22,10 +23,10 @@ func TopK[E constraints.Ordered](x []E, k int) {
 // Only the kth element x[k-1] is guaranteed to be in sorted order. All elements
 // in x[:k-1] are less than or equal to the kth element, all elements in x[k:]
 // are greater than or equal. This is faster than using slices.SortFunc.
-func TopKFunc[E any](x []E, k int, less func(E, E) bool) {
+func TopKFunc[E any](x []E, k int, cmp func(E, E) int) {
 	k = min(k, len(x))
 	if k > 0 {
-		floydRivestFunc(x, 0, len(x)-1, k-1, less)
+		floydRivestFunc(x, 0, len(x)-1, k-1, cmp)
 	}
 }
 
@@ -86,7 +87,7 @@ func floydRivest[E constraints.Ordered](x []E, left, right, k int) {
 	}
 }
 
-func floydRivestFunc[E any](x []E, left, right, k int, less func(E, E) bool) {
+func floydRivestFunc[E any](x []E, left, right, k int, cmp func(E, E) int) {
 	// left is the left index for the interval
 	// right is the right index for the interval
 	// k is the desired index value, where x[k] is the (k+1)th smallest element when left = 0
@@ -104,28 +105,28 @@ func floydRivestFunc[E any](x []E, left, right, k int, less func(E, E) bool) {
 			var kf = float64(k)
 			var newLeft = max(left, int(math.Floor(kf-i*s/n+sd)))
 			var newRight = min(right, int(math.Floor(kf+(n-i)*s/n+sd)))
-			floydRivestFunc(x, newLeft, newRight, k, less)
+			floydRivestFunc(x, newLeft, newRight, k, cmp)
 		}
 		// partition the elements between left and right around t
 		var t = x[k]
 		var i = left
 		var j = right
 		x[left], x[k] = x[k], x[left]
-		if less(t, x[right]) {
+		if cmp(t, x[right]) < 0 {
 			x[left], x[right] = x[right], x[left]
 		}
 		for i < j {
 			x[i], x[j] = x[j], x[i]
 			i++
 			j--
-			for i < length && less(x[i], t) {
+			for i < length && (cmp(x[i], t) < 0) {
 				i++
 			}
-			for j >= 0 && less(t, x[j]) {
+			for j >= 0 && (cmp(t, x[j]) < 0) {
 				j--
 			}
 		}
-		if !(less(x[left], t) || less(t, x[left])) { // x[left] == t
+		if cmp(x[left], t) == 0 {
 			x[left], x[j] = x[j], x[left]
 		} else {
 			j++

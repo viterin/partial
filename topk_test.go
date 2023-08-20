@@ -2,34 +2,35 @@ package partial
 
 import (
 	"fmt"
-	"golang.org/x/exp/slices"
 	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/slices"
 )
 
-func checkTopKInvariants[E any](x []E, k int, less func(E, E) bool) bool {
+func checkTopKInvariants[E any](x []E, k int, cmp func(E, E) int) bool {
 	sorted := slices.Clone(x)
-	slices.SortFunc(sorted, less)
+	slices.SortFunc(sorted, cmp)
 
 	if len(x) < 2 {
 		return true
 	}
 
 	// Kth element should be in sorted position
-	if less(x[k-1], sorted[k-1]) || less(sorted[k-1], x[k-1]) { // x[k-1] != sorted[k-1]
+	if cmp(x[k-1], sorted[k-1]) != 0 {
 		return false
 	}
 
 	// All elements before the kth should be less or equal
 	for _, v := range x[:k-1] {
-		if less(x[k-1], v) {
+		if cmp(x[k-1], v) < 0 {
 			return false
 		}
 	}
 
 	// All elements following the kth should be greater or equal
 	for _, v := range x[k:] {
-		if less(v, x[k-1]) {
+		if cmp(v, x[k-1]) < 0 {
 			return false
 		}
 	}
@@ -58,11 +59,11 @@ func TestTopK(t *testing.T) {
 		big[i] = rand.Intn(10_000)
 	}
 	cases = append(cases, testCase[int]{big, 10_000})
-	less := func(x, y int) bool { return x < y }
+	cmp := func(x, y int) int { return x - y }
 	for _, c := range cases {
 		x := slices.Clone(c.x)
 		TopK(x, c.k)
-		if !checkTopKInvariants(x, c.k, less) {
+		if !checkTopKInvariants(x, c.k, cmp) {
 			t.Errorf("Invariants failed, in=%v, k=%v, out=%v.", c.x, c.k, x)
 		}
 	}
@@ -80,18 +81,18 @@ func TestTopKFunc(t *testing.T) {
 		{[]person{{"bob", 45}, {"jane", 31}, {"karl", 31}}, 2},
 		{[]person{{"bob", 45}, {"jane", 31}, {"karl", 31}}, 3},
 	}
-	less := func(x, y person) bool { return x.age < y.age }
+	cmp := func(x, y person) int { return x.age - y.age }
 	for _, c := range cases {
 		x := slices.Clone(c.x)
-		TopKFunc(x, c.k, less)
-		if !checkTopKInvariants(x, c.k, less) {
+		TopKFunc(x, c.k, cmp)
+		if !checkTopKInvariants(x, c.k, cmp) {
 			t.Errorf("Invariants failed, in=%v, k=%v, out=%v.", c.x, c.k, x)
 		}
 	}
 }
 
 func TestTopKOutOfBounds(t *testing.T) {
-	less := func(x, y int) bool { return x < y }
+	cmp := func(x, y int) int { return x - y }
 
 	x := []int{9, 2, 5}
 	TopK(x, -1)
@@ -101,7 +102,7 @@ func TestTopKOutOfBounds(t *testing.T) {
 
 	y := []int{9, 2, 5}
 	TopK(y, 5)
-	if !checkTopKInvariants(y, 3, less) {
+	if !checkTopKInvariants(y, 3, cmp) {
 		t.Errorf("Should take TopK of entire slice when k is greater than len")
 	}
 }
@@ -127,7 +128,7 @@ func BenchmarkTopK(b *testing.B) {
 				b.StopTimer()
 				y := slices.Clone(x)
 				b.StartTimer()
-				slices.SortFunc(y, func(i, j int) bool { return i < j })
+				slices.SortFunc(y, func(i, j int) int { return i - j })
 			}
 		})
 		b.Run(fmt.Sprintf("partial.Sort%d", size), func(b *testing.B) {
@@ -143,7 +144,7 @@ func BenchmarkTopK(b *testing.B) {
 				b.StopTimer()
 				y := slices.Clone(x)
 				b.StartTimer()
-				SortFunc(y, k, func(i, j int) bool { return i < j })
+				SortFunc(y, k, func(i, j int) int { return i - j })
 			}
 		})
 		b.Run(fmt.Sprintf("partial.TopK_%d", size), func(b *testing.B) {
@@ -159,7 +160,7 @@ func BenchmarkTopK(b *testing.B) {
 				b.StopTimer()
 				y := slices.Clone(x)
 				b.StartTimer()
-				TopKFunc(y, k, func(i, j int) bool { return i < j })
+				TopKFunc(y, k, func(i, j int) int { return i - j })
 			}
 		})
 	}

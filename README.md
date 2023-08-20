@@ -17,26 +17,44 @@ go get -u github.com/viterin/partial
 The `partial.Sort` function takes a slice of any ordered type and the number of elements to sort:
 
 ```go
-s := []int{9, 2, 5, -1, 4}
-partial.Sort(s, 2)
-fmt.Println(s[:2]) // [-1 2]
+package main
+
+import (
+	"fmt"
+	"github.com/viterin/partial"
+)
+
+func main() {
+	s := []int{9, 2, 5, -1, 4}
+	partial.Sort(s, 2)
+	fmt.Println(s[:2]) // [-1 2]
+}
 ```
 
-The `partial.SortFunc` function accepts a slice of any type and sorts using a custom ordering function:
+The `partial.SortFunc` function accepts a slice of any type and sorts using a custom comparison function:
 
 ```go
-type Person struct {
-    Name string
-    Age  int
+package main
+
+import (
+	"fmt"
+	"github.com/viterin/partial"
+)
+
+func main() {
+	type Person struct {
+		Name string
+		Age  int
+	}
+	s := []Person{
+		{"Karl", 39},
+		{"Jane", 31},
+		{"Bob", 45},
+		{"Ann", 19},
+	}
+	partial.SortFunc(s, 2, func(a, b Person) int { return b.Age - a.Age })
+	fmt.Println(s[:2]) // [{Bob 45}, {Karl 39}]
 }
-s := []Person{
-    {"Karl", 39},
-    {"Jane", 31},
-    {"Bob", 45},
-    {"Ann", 19},
-}
-partial.SortFunc(s, 2, func(a, b Person) bool { return a.Age > b.Age })
-fmt.Println(s[:2]) // [{Bob 45}, {Karl 39}]
 ```
 
 ### Top k elements
@@ -44,9 +62,18 @@ fmt.Println(s[:2]) // [{Bob 45}, {Karl 39}]
 The `partial.TopK` function places the smallest k elements of a slice in front, but only guarantees that the kth element is in sorted order. This can be significantly faster than a partial sort if the order among the elements is unimportant, especially for large k:
 
 ```go
-s := []int{9, 2, 5, -1, 4}
-partial.TopK(s, 3)
-fmt.Println(s[:3]) // [-1 2 4] or [2 -1 4]
+package main
+
+import (
+	"fmt"
+	"github.com/viterin/partial"
+)
+
+func main() {
+	s := []int{9, 2, 5, -1, 4}
+	partial.TopK(s, 3)
+	fmt.Println(s[:3]) // [-1 2 4] or [2 -1 4]
+}
 ```
 
 The `partial.TopKFunc` accepts a slice of any type and a custom ordering function.
