@@ -23,7 +23,7 @@ func TopK[E constraints.Ordered](x []E, k int) {
 // Only the kth element x[k-1] is guaranteed to be in sorted order. All elements
 // in x[:k-1] are less than or equal to the kth element, all elements in x[k:]
 // are greater than or equal. This is faster than using slices.SortFunc.
-func TopKFunc[E any](x []E, k int, cmp func(E, E) int) {
+func TopKFunc[S ~[]E, E any](x S, k int, cmp func(E, E) int) {
 	k = min(k, len(x))
 	if k > 0 {
 		floydRivestFunc(x, 0, len(x)-1, k-1, cmp)
@@ -31,7 +31,7 @@ func TopKFunc[E any](x []E, k int, cmp func(E, E) int) {
 }
 
 // https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm
-func floydRivest[E constraints.Ordered](x []E, left, right, k int) {
+func floydRivest[S ~[]E, E constraints.Ordered](x S, left, right, k int) {
 	// left is the left index for the interval
 	// right is the right index for the interval
 	// k is the desired index value, where x[k] is the (k+1)th smallest element when left = 0
@@ -87,7 +87,7 @@ func floydRivest[E constraints.Ordered](x []E, left, right, k int) {
 	}
 }
 
-func floydRivestFunc[E any](x []E, left, right, k int, cmp func(E, E) int) {
+func floydRivestFunc[S ~[]E, E any](x S, left, right, k int, cmp func(E, E) int) {
 	// left is the left index for the interval
 	// right is the right index for the interval
 	// k is the desired index value, where x[k] is the (k+1)th smallest element when left = 0

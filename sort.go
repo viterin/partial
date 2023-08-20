@@ -8,7 +8,7 @@ import (
 // Sort partially sorts a slice of any ordered type in ascending order.
 // Only elements in x[:k] will be in sorted order. This is faster than using
 // slices.Sort when k is small relative to the number of elements.
-func Sort[E constraints.Ordered](x []E, k int) {
+func Sort[S ~[]E, E constraints.Ordered](x S, k int) {
 	k = min(k, len(x))
 	if k > 0 {
 		floydRivest(x, 0, len(x)-1, k-1) // 0-indexed
@@ -19,7 +19,7 @@ func Sort[E constraints.Ordered](x []E, k int) {
 // SortFunc partially sorts the slice x in ascending order as determined by the
 // less function. Only elements in x[:k] will be in sorted order. This is faster
 // than using slices.SortFunc when k is small relative to the number of elements.
-func SortFunc[E any](x []E, k int, cmp func(E, E) int) {
+func SortFunc[S ~[]E, E any](x S, k int, cmp func(E, E) int) {
 	k = min(k, len(x))
 	if k > 0 {
 		floydRivestFunc(x, 0, len(x)-1, k-1, cmp)
